@@ -1,0 +1,3 @@
+# Feature and Target column :
+x = df1[["pclass","sex","age","embarked","alone"]]
+y = df1["survived"]
