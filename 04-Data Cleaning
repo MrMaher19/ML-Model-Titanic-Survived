@@ -1,0 +1,6 @@
+# Data Cleaning : 
+
+      df1["age"] = df1["age"].fillna(df1["age"].mean())
+      df1["embarked"] = df1["embarked"].fillna("unknown")
+      df1.drop_duplicates(inplace=True)
+      df1
