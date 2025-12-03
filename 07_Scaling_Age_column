@@ -1,0 +1,5 @@
+# Scaling age column:
+
+    scl = StandardScaler()
+    df1["age"] = scl.fit_transform(df1[["age"]])
+    df1
