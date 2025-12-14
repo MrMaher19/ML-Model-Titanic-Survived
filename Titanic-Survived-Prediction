@@ -1,0 +1,164 @@
+# Importing Libraries :
+      import pandas as pd
+      import seaborn as sns
+      import matplotlib.pyplot as plt
+      from sklearn.preprocessing import LabelEncoder,OrdinalEncoder,StandardScaler
+      from sklearn.linear_model import LinearRegression, LogisticRegression
+      from sklearn.model_selection import train_test_split
+
+<-------------------------------------------------------------------------------------------->
+
+# Load Dataset :
+      df = sns.load_dataset("titanic")
+      df["survived"].value_counts()
+      df.isna().sum()
+      df.duplicated().sum()
+      df.info()
+      df.describe()
+
+<-------------------------------------------------------------------------------------------->
+
+# Select Important Columns for Model:
+      df1 = df[["survived","pclass","sex","age","embarked","alone"]].copy()
+      df1
+
+<-------------------------------------------------------------------------------------------->
+
+# Visualization:
+
+  # Visualize the relation of "age" and "survival" column:
+
+       df["AgeGroup"] = pd.cut(df["age"],
+                            bins=[0,10,20,30,40,50,60,80],
+                            labels=["0-10","10-20","20-30","30-40","40-50","50-60","60+"])
+      sns.barplot(x="AgeGroup", y="survived", data=df)
+      plt.title("Survival Rate by Age Group")
+      plt.show()
+
+<-------------------------------------------------------------------------------------------->
+
+
+  # Visualize the relation of "sex" and "survival" column using barplot:
+
+      sns.barplot(x="sex", y="survived", data=df)
+      plt.title("Survival Rate by Sex")
+      plt.show()
+
+<-------------------------------------------------------------------------------------------->
+
+
+  # Visualize the relation of "sex" and "survival" column using countplot:
+      sns.countplot(x="sex", hue="survived", data=df)
+      plt.title("Survival Count by Sex")
+      plt.show()
+
+<-------------------------------------------------------------------------------------------->
+
+# Data Cleaning : 
+
+      df1["age"] = df1["age"].fillna(df1["age"].mean())
+      df1["embarked"] = df1["embarked"].fillna("unknown")
+      df1.drop_duplicates(inplace=True)
+      df1
+
+<-------------------------------------------------------------------------------------------->
+
+# Label Encoding:
+    def enco(cols):
+      for col in cols:
+        l = LabelEncoder()
+        df1[col] = l.fit_transform(df1[col])
+      return
+    
+    enco(['sex', 'embarked', 'alone'])
+    df1
+
+<-------------------------------------------------------------------------------------------->
+
+# Scaling age column:
+
+    scl = StandardScaler()
+    df1["age"] = scl.fit_transform(df1[["age"]])
+    df1
+
+<-------------------------------------------------------------------------------------------->
+
+# Histogram
+sns.histplot(df1['age'], kde=True)
+plt.title('Histogram of Scaled Age in df1')
+plt.xlabel('Scaled Age')
+plt.ylabel('Frequency')
+plt.show()
+
+<-------------------------------------------------------------------------------------------->
+
+# Feature and Target column :
+x = df1[["pclass","sex","age","embarked","alone"]]
+y = df1["survived"]
+
+<-------------------------------------------------------------------------------------------->
+
+# Train_Test_Split :
+      x_train,x_test,y_train,y_test = train_test_split(x, y, train_size=.80,random_state=42)
+
+<-------------------------------------------------------------------------------------------->
+
+# Model :
+    model = LogisticRegression()
+    model.fit(x_train,y_train)
+
+<-------------------------------------------------------------------------------------------->
+
+# Make a Prediction by using the new data, whether the model can predict survival for new data.
+
+# Example new passenger data
+# Let's say we have a 30-year-old female in first class, embarked from Cherbourg, not alone.
+new_passenger = pd.DataFrame({
+    'pclass': [1],
+    'sex': ['female'],
+    'age': [30.0],
+    'embarked': ['C'],
+    'alone': [False]
+})
+
+print("Original new passenger data:")
+display(new_passenger)
+
+# Apply the same preprocessing steps
+
+# 1. Encoding categorical features (sex, embarked, alone)
+# Based on previous LabelEncoder transformations:
+# sex: female = 0, male = 1
+# embarked: C = 0, Q = 1, S = 2
+# alone: False = 0, True = 1
+
+new_passenger['sex'] = new_passenger['sex'].map({'female': 0, 'male': 1})
+new_passenger['embarked'] = new_passenger['embarked'].map({'C': 0, 'Q': 1, 'S': 2})
+new_passenger['alone'] = new_passenger['alone'].map({False: 0, True: 1})
+
+# 2. Scaling the age column using the previously fitted StandardScaler (scl)
+new_passenger['age'] = scl.transform(new_passenger[['age']])
+
+print("\nPreprocessed new passenger data:")
+display(new_passenger)
+
+# 3. Make the prediction
+predicted_survival = model.predict(new_passenger)
+predicted_proba = model.predict_proba(new_passenger)[:, 1] # Probability of survival
+
+print(f"\nPredicted survival (0=No, 1=Yes): {predicted_survival[0]}")
+print(f"Probability of survival: {predicted_proba[0]:.4f}")
+
+if predicted_survival[0] == 1:
+    print("The model predicts that this passenger would survive.")
+else:
+    print("The model predicts that this passenger would not survive.")
+
+<-------------------------------------------------------------------------------------------->
+
+    
+                                                            # Result : 
+                                                            # Predicted survival (0=No, 1=Yes): 1
+                                                            # Probability of survival: 0.9102
+                                                            # Model Score is = almost 76%
+                                                            # The model predicts that this passenger would survive.
