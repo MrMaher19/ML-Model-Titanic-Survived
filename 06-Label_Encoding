@@ -1,9 +1,0 @@
-# Label Encoding:
-    def enco(cols):
-      for col in cols:
-        l = LabelEncoder()
-        df1[col] = l.fit_transform(df1[col])
-      return
-    
-    enco(['sex', 'embarked', 'alone'])
-    df1
